@@ -1,14 +1,14 @@
-import React, { useCallback } from 'react';
-import { Helmet } from 'react-helmet';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { cn } from '@bem-react/classname';
+import React, { useCallback } from "react";
+import { Helmet } from "react-helmet";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { cn } from "@bem-react/classname";
 
-import { CheckoutFormData } from '../../common/types';
-import { Form } from '../components/Form';
-import { ApplicationState, checkout, clearCart } from '../store';
+import { CheckoutFormData } from "../../common/types";
+import { Form } from "../components/Form";
+import { ApplicationState, checkout, clearCart } from "../store";
 
-const bem = cn('Cart');
+const bem = cn("Cart");
 
 export const Cart: React.FC = () => {
     const dispatch = useDispatch();
@@ -19,9 +19,12 @@ export const Cart: React.FC = () => {
         dispatch(clearCart());
     }, [dispatch]);
 
-    const onSubmit = useCallback((form: CheckoutFormData) => {
-        dispatch(checkout(form, cart));
-    }, [dispatch, cart]);
+    const onSubmit = useCallback(
+        (form: CheckoutFormData) => {
+            dispatch(checkout(form, cart));
+        },
+        [dispatch, cart]
+    );
 
     let content: React.ReactNode = null;
 
@@ -29,22 +32,34 @@ export const Cart: React.FC = () => {
 
     if (!cartIsEmpty) {
         const rows = Object.entries(cart).map(([id, item], index) => {
-
             return (
                 <tr key={id} data-testid={id}>
-                    <th className={bem('Index')} scope="row">{index + 1}</th>
-                    <td className={bem('Name')}>{item.name}</td>
-                    <td className={bem('Price')}>${item.price}</td>
-                    <td className={bem('Count')}>{item.count}</td>
-                    <td className={bem('Total')}>${item.count * item.price}</td>
+                    <th className={bem("Index")} scope="row">
+                        {index + 1}
+                    </th>
+                    <td data-testid={`name-${id}`} className={bem("Name")}>
+                        {item.name}
+                    </td>
+                    <td data-testid={`price-${id}`} className={bem("Price")}>
+                        ${item.price}
+                    </td>
+                    <td data-testid={`count-${id}`} className={bem("Count")}>
+                        {item.count}
+                    </td>
+                    <td data-testid={`total-${id}`} className={bem("Total")}>
+                        ${item.count * item.price}
+                    </td>
                 </tr>
             );
         });
 
-        const total = Object.values(cart).reduce((sum, { count, price }) => sum + count * price, 0);
+        const total = Object.values(cart).reduce(
+            (sum, { count, price }) => sum + count * price,
+            0
+        );
 
         content = (
-            <table className={bem('Table', ['table'])}>
+            <table className={bem("Table", ["table"])}>
                 <thead>
                     <tr>
                         <th scope="col">#</th>
@@ -54,13 +69,16 @@ export const Cart: React.FC = () => {
                         <th scope="col">Total</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {rows}
-                </tbody>
+                <tbody>{rows}</tbody>
                 <tfoot>
                     <tr>
                         <td colSpan={4}>Order price:</td>
-                        <td className={bem('OrderPrice')}>${total}</td>
+                        <td
+                            className={bem("OrderPrice")}
+                            data-testid="totalsum"
+                        >
+                            ${total}
+                        </td>
                     </tr>
                 </tfoot>
             </table>
@@ -68,7 +86,8 @@ export const Cart: React.FC = () => {
     } else {
         content = (
             <>
-                Cart is empty. Please select products in the <Link to="/catalog">catalog</Link>.
+                Cart is empty. Please select products in the{" "}
+                <Link to="/catalog">catalog</Link>.
             </>
         );
     }
@@ -76,7 +95,13 @@ export const Cart: React.FC = () => {
     const actions = cartIsEmpty ? null : (
         <div className="row mb-4">
             <div className="col-6">
-                <button className={bem('Clear', ['btn', 'btn-outline-secondary'])} onClick={onClear}>Clear shopping cart</button>
+                <button
+                    className={bem("Clear", ["btn", "btn-outline-secondary"])}
+                    onClick={onClear}
+                    data-testid="clearshoping"
+                >
+                    Clear shopping cart
+                </button>
             </div>
         </div>
     );
@@ -90,26 +115,38 @@ export const Cart: React.FC = () => {
         </div>
     );
 
-    const alertClass = process.env.BUG_ID !== '8' ? 'alert-success' : 'alert-danger';
+    const alertClass =
+        process.env.BUG_ID !== "8" ? "alert-success" : "alert-danger";
 
-    const orderInfo = cartIsEmpty && latestOrderId ? (
-        <div className="row my-2">
-            <div className="col-12 col-sm-8 col-md-6">
-                <div className={bem('SuccessMessage', ['alert', alertClass])}>
-                    <h4 className="alert-heading">Well done!</h4>
-                    <p>Order #<strong className={bem('Number')}>{latestOrderId}</strong> has been successfully completed.</p>
-                    <hr/>
-                    <p className="mb-0">Please wait for confirmation of delivery.</p>
+    const orderInfo =
+        cartIsEmpty && latestOrderId ? (
+            <div className="row my-2">
+                <div className="col-12 col-sm-8 col-md-6">
+                    <div
+                        className={bem("SuccessMessage", ["alert", alertClass])}
+                    >
+                        <h4 className="alert-heading">Well done!</h4>
+                        <p>
+                            Order #
+                            <strong className={bem("Number")}>
+                                {latestOrderId}
+                            </strong>{" "}
+                            has been successfully completed.
+                        </p>
+                        <hr />
+                        <p className="mb-0">
+                            Please wait for confirmation of delivery.
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-    ) : null;
+        ) : null;
 
     return (
         <div className={bem()}>
             <Helmet title="Shopping cart" />
             <div className="row mb-4">
-                <div className="col">
+                <div className="col" data-testid="shoppingcart">
                     <h1>Shopping cart</h1>
                     {orderInfo}
                     {content}
@@ -119,4 +156,4 @@ export const Cart: React.FC = () => {
             {form}
         </div>
     );
-}
+};

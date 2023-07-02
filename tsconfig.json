@@ -7,11 +7,12 @@
         "target": "es5",
         "allowJs": true,
         "jsx": "react",
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
     },
-    "include": [
-        "src"
-    ],
+    "include": ["src"],
     "ts-node": {
         "compilerOptions": {
             "module": "CommonJS"
