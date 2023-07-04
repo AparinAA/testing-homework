@@ -9,6 +9,7 @@ import {
     jest,
     beforeAll,
     afterAll,
+    afterEach,
 } from "@jest/globals";
 
 import { Application } from "../../src/client/Application";
@@ -57,8 +58,8 @@ describe("Catalog", () => {
             return !loadingElem;
         });
 
-        // console.info(application.container.innerHTML);
         const items = await screen.findAllByTestId(/[0-9]+/);
+        console.info(application.container.innerHTML);
 
         uniqueItems = items.filter((item) =>
             item.className.includes("ProductItem")
@@ -102,7 +103,7 @@ describe("Product page", () => {
 
     let initCartState: CartState;
 
-    beforeAll(() => {
+    beforeEach(() => {
         Object.defineProperty(window, "location", {
             configurable: true,
             value: { reload: jest.fn() },
@@ -124,7 +125,7 @@ describe("Product page", () => {
         store = initStore(api, cart);
     });
 
-    afterAll(() => {
+    afterEach(() => {
         Object.defineProperty(window, "location", {
             configurable: true,
             value: original,
@@ -219,6 +220,30 @@ describe("Product page", () => {
     });
 
     it("После нажатия на кнопку Добавить товар, должно увеличиться количество", async () => {
+        const application = render(
+            <MemoryRouter initialEntries={["/catalog/1"]}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            const loadingElem = screen.getByText("LOADING");
+            return !loadingElem;
+        });
+
+        const { getByTestId } = application;
+
+        getByTestId("addcart").click();
+
+        const oldCountProduct = initCartState["1"].count;
+        const newCountProduct = cart.getState()["1"].count;
+
+        expect(newCountProduct).toEqual(oldCountProduct + 1);
+    });
+
+    it("Cодержимое корзины должно сохраняться между перезагрузками страницы", async () => {
         const application = render(
             <MemoryRouter initialEntries={["/catalog/1"]}>
                 <Provider store={store}>
